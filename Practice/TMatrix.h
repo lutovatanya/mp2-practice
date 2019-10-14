@@ -1,9 +1,9 @@
 ﻿#ifndef _TMATRIX_H_ 
 #define _TMATRIX_H_ 
-#define RAND 4
 
 #include <iostream>
 #include "Exception.h"
+#include <iomanip>
 
 using namespace std;
 
@@ -15,7 +15,7 @@ protected:
     ValueType* elements;
     int startIndex;
 public:
-    TVector(int n = 10, int startInd = 0);
+    TVector(int n = 3, int startInd = 0);
     ~TVector();
     TVector(const TVector&);
     int GetSize() const;
@@ -27,21 +27,21 @@ public:
     TVector operator-(ValueType);
     TVector operator-(const TVector&);
     TVector operator*(ValueType);
-    TVector operator*(const TVector&);
+    ValueType operator*(const TVector&) const;
     bool operator==(const TVector&)const;
     bool operator!=(const TVector&)const;
     ValueType& operator[](int); //на запись
-    const ValueType& operator[](int) const; //на чтение
-    void Random1();
+    const ValueType& operator[](int) const;
 
     friend ostream& operator << (ostream & o, const TVector& x)
     {
-        cout << "\n ";
         for (int i = 0; i < x.GetIndex(); i++)
-            o << "  ";
+        {
+            o << setw(7) << setprecision(2) << right << " ";
+        }
         for (int i = 0; i < x.size; i++)
         {
-            o << x.elements[i] << " ";
+            o << setw(7) << setprecision (2) << right << x.elements[i];
         }
         return o;
     }
@@ -49,18 +49,12 @@ public:
     {
         for (int i = 0; i < x.size; i++)
         {
-            o >> x.elements[i] >> " ";
+            o >> x.elements[i];
         }
         return o;
     }
 };
 
-template<typename ValueType>
-void TVector<ValueType>::Random1()
-{
-    for (int i = 0; i < size; i++)
-        elements[i] = rand() % RAND + 1;
-}
 
 template<typename ValueType>
 TVector<ValueType>::TVector(int n, int startInd)
@@ -95,68 +89,68 @@ TVector<ValueType>::TVector(const TVector& x)
 }
 
 template<typename ValueType>
-TVector<ValueType> & TVector<ValueType>::operator=(const TVector& vector)
+TVector<ValueType> & TVector<ValueType>::operator=(const TVector<ValueType>& vector)
 {
-    if (&vector != this)
+    if (vector != *this)
     {
-    if (size != vector.size)
-    {
-        delete[] elements;
-        size = vector.size;
-        elements = new ValueType[size];
-    }
-    startIndex = vector.startIndex;
-    for (int i = 0; i < vector.size; i++)
-        elements[i] = vector.elements[i];
+        if (size != vector.size)
+        {
+            delete[] elements;
+            size = vector.size;
+            elements = new ValueType[size];
+        }
+        startIndex = vector.startIndex;
+        for (int i = 0; i < vector.size; i++)
+            elements[i] = vector.elements[i];
     }
     return *this;
 }
-                                                                                                     
+
 template<typename ValueType>
-TVector<ValueType> TVector<ValueType>::operator+(const TVector& vector)
+TVector<ValueType> TVector<ValueType>::operator+(const TVector<ValueType>& vector)
 {
     if ((size != vector.size) || (startIndex != vector.startIndex))
     {
         throw C2();
     }
     TVector<ValueType> vector1(*this);
-        for (int i = 0; i < size; i++)
-            vector1.elements[i] = vector1.elements[i] + vector.elements[i];
+    for (int i = 0; i < size; i++)
+        vector1.elements[i] += vector.elements[i];
     return vector1;
 }
 
 template<typename ValueType>
-TVector<ValueType> TVector<ValueType>::operator-(const TVector& vector)
+TVector<ValueType> TVector<ValueType>::operator-(const TVector<ValueType>& vector)
 {
     if ((size != vector.size) || (startIndex != vector.startIndex))
     {
         throw C2();
     }
     TVector<ValueType> vector1(*this);
-        for (int i = 0; i < size; i++)
-            vector1.elements[i] = vector1.elements[i] - vector.elements[i];
+    for (int i = 0; i < size; i++)
+        vector1.elements[i] -= vector.elements[i];
     return vector1;
 }
 
 template<typename ValueType>
-TVector<ValueType> TVector<ValueType>::operator*(const TVector& vector)
+ValueType TVector<ValueType>::operator*(const TVector<ValueType>& vector) const
 {
     if ((size != vector.size) || (startIndex != vector.startIndex))
     {
         throw C2();
     }
-    TVector<ValueType> vector1(*this);
-        for (int i = 0; i < size; i++)
-            vector1.elements[i] = vector1.elements[i] * vector.elements[i];
-    return vector1;
+    ValueType rez = 0;
+    for (int i = 0; i < size; i++)
+       rez += elements[i] * vector.elements[i];
+    return rez;
 }
 
 template<typename ValueType>
 TVector<ValueType> TVector<ValueType>::operator+(ValueType a)
 {
     TVector<ValueType> vector1(*this);
-        for (int i = 0; i < size; i++)
-            vector1.elements[i] = vector1.elements[i] + a;
+    for (int i = 0; i < size; i++)
+        vector1.elements[i] += a;
     return vector1;
 }
 
@@ -164,8 +158,8 @@ template<typename ValueType>
 TVector<ValueType> TVector<ValueType>::operator-(ValueType a)
 {
     TVector<ValueType> vector1(*this);
-        for (int i = 0; i < size; i++)
-            vector1.elements[i] = vector1.elements[i] - a;
+    for (int i = 0; i < size; i++)
+        vector1.elements[i] = vector1.elements[i] - a;
     return vector1;
 }
 
@@ -173,8 +167,8 @@ template<typename ValueType>
 TVector<ValueType> TVector<ValueType>::operator*(ValueType a)
 {
     TVector<ValueType> vector1(*this);
-        for (int i = 0; i < size; i++)
-            vector1.elements[i] = vector1.elements[i] * a;
+    for (int i = 0; i < size; i++)
+        vector1.elements[i] = vector1.elements[i] * a;
     return vector1;
 }
 
@@ -183,7 +177,7 @@ ValueType & TVector<ValueType>::operator[](int idx)
 {
     if ((idx < 0) || (idx >= size))
         throw C3();
-        return elements[idx];
+    return elements[idx];
 }
 
 template<typename ValueType>
@@ -191,7 +185,7 @@ const ValueType & TVector<ValueType>::operator[](int idx) const
 {
     if ((idx < 0) || (idx >= size))
         throw C3();
-        return elements[idx];
+    return elements[idx];
 }
 
 template<typename ValueType>
@@ -210,29 +204,13 @@ bool TVector<ValueType>::operator==(const TVector& v2)const
 template<typename ValueType>
 bool TVector<ValueType>::operator!=(const TVector& v2)const
 {
-    if ((size != v2.size) || (startIndex != v2.startIndex))
-        return false;
-    for (int i = 0; i < size; i++)
-    {
-        if (v2.elements[i] == elements[i])
-            return false;
-    }
-    return true;
+   return !(v2 == *this);
 }
 
 template<typename ValueType>
 ValueType TVector<ValueType>::lenght() const
 {
-    if (size <= 0)
-    { 
-        throw C1();
-    }
-    double res = 0;
-    for (int i = 0; i < size; i++)
-    {
-        res += elements[i] * elements[i];
-    }
-    return sqrt(res);
+    return sqrt((*this) * (*this));
 }
 
 template<class ValType>
@@ -267,14 +245,13 @@ public:
     bool operator!=(const TMatrix&)const;
     TMatrix operator*(const TMatrix&);
     TVector<ValueType> operator*(const TVector<ValueType>&);
-    void Random();
+
 
     friend ostream& operator << (ostream & o, const TMatrix& x)
     {
         for (int i = 0; i < x.size; i++)
         {
-            cout << endl << x.elements[i] << " ";
-   
+            o << endl << x.elements[i] << " ";
         }
         return o;
     }
@@ -283,17 +260,17 @@ public:
     {
         for (int i = 0; i < x.size; i++)
         {
-            cin >> x.elements[i] >> " ";
+            o >> x.elements[i];
         }
         return o;
     }
 };
 
 template<typename ValueType>
-TMatrix<ValueType>::TMatrix(int n): TVector<TVector<ValueType> >(n)
+TMatrix<ValueType>::TMatrix(int n) : TVector<TVector<ValueType> >(n)
 {
     for (int i = 0; i < n; i++)
-       this->elements[i] = TVector<ValueType>(n - i, i);
+        this->elements[i] = TVector<ValueType>(n - i, i);
 }
 
 template<typename ValueType>
@@ -301,13 +278,8 @@ TMatrix<ValueType>::~TMatrix()
 {}
 
 template<typename ValueType>
-TMatrix<ValueType>::TMatrix(const TMatrix<ValueType>& m)
-{
-    this->size = m.size;
-    this->elements = new TVector<ValueType>[m.size];
-    for (int i = 0; i < m.size; i++)
-       this->elements[i] = m.elements[i];
-}
+TMatrix<ValueType>::TMatrix(const TMatrix<ValueType>& m) : TVector<TVector<ValueType> >(m)
+{}
 
 
 template<typename ValueType>
@@ -315,31 +287,34 @@ TMatrix<ValueType>::TMatrix(const TVector<TVector<ValueType> >& v) : TVector<TVe
 {}
 
 template<typename ValueType>
-TMatrix<ValueType> TMatrix<ValueType>::operator+(const TMatrix& matrix)
+TMatrix<ValueType> TMatrix<ValueType>::operator+(const TMatrix<ValueType>& matrix)
 {
     if (this->size != matrix.size)
     {
         throw C2();
     }
     TMatrix<ValueType> m(*this);
-        for (int i = 0; i < this->size; i++)
-            m.elements[i] = m.elements[i] + matrix.elements[i];
+    for (int i = 0; i < this->size; i++)
+        m.elements[i] = m.elements[i] + matrix.elements[i];
     return m;
 }
 
 template<typename ValueType>
-TMatrix<ValueType> TMatrix<ValueType>::operator*(const TMatrix& m)
+TMatrix<ValueType> TMatrix<ValueType>::operator*(const TMatrix<ValueType>& m)
 {
     if (this->size != m.size)
     {
         throw C2();
     }
-        
+
     TMatrix<ValueType> Matrix(*this);
     for (int i = 0; i < this->size; i++)
         for (int j = this->elements[i].GetIndex(); j < this->size; j++)
+        {
+            Matrix.elements[i][j - i] = 0.0;
             for (int k = i; k <= j; k++)
                 Matrix.elements[i][j - i] += this->elements[i][k - i] * m.elements[k][j - k];
+        }
     return Matrix;
 }
 
@@ -369,8 +344,8 @@ TMatrix<ValueType> TMatrix<ValueType>::operator-(const TMatrix& matrix)
         throw C2();
     }
     TMatrix<ValueType> m(*this);
-        for (int i = 0; i < this->size; i++)
-            m.elements[i] = m.elements[i] - matrix.elements[i];
+    for (int i = 0; i < this->size; i++)
+        m.elements[i] = m.elements[i] - matrix.elements[i];
     return m;
 }
 
@@ -378,8 +353,8 @@ template<typename ValueType>
 TMatrix<ValueType> TMatrix<ValueType>::operator+(ValueType a)
 {
     TMatrix<ValueType> m(*this);
-        for (int i = 0; i < this->size; i++)
-            m.elements[i] = m.elements[i] + a;
+    for (int i = 0; i < this->size; i++)
+        m.elements[i] = m.elements[i] + a;
     return m;
 }
 
@@ -387,8 +362,8 @@ template<typename ValueType>
 TMatrix<ValueType> TMatrix<ValueType>::operator-(ValueType a)
 {
     TMatrix<ValueType> m(*this);
-        for (int i = 0; i < this->size; i++)
-            m.elements[i] = m.elements[i] - a;
+    for (int i = 0; i < this->size; i++)
+        m.elements[i] = m.elements[i] - a;
     return m;
 }
 
@@ -397,8 +372,8 @@ TMatrix<ValueType> TMatrix<ValueType>::operator*(ValueType a)
 {
 
     TMatrix<ValueType> m(*this);
-        for (int i = 0; i < m.size; i++)
-            m.elements[i] = m.elements[i] * a;
+    for (int i = 0; i < m.size; i++)
+        m.elements[i] = m.elements[i] * a;
     return m;
 }
 
@@ -411,7 +386,7 @@ bool TMatrix<ValueType>::operator!=(const TMatrix & mtr) const
 template<typename ValueType>
 TMatrix<ValueType> & TMatrix<ValueType>::operator=(const TMatrix & mtr)
 {
-    if (this != &mtr)
+    if (*this != mtr)
     {
         if (this->size != mtr.size)
         {
@@ -438,14 +413,5 @@ bool TMatrix<ValueType>::operator==(const TMatrix & mtr) const
             return false;
     }
     return true;
-}
-
-template<typename ValType>
-void TMatrix<ValType>::Random()
-{
-    for (int i = 0; i < this->size; i++)
-        this->elements[i].Random1();
-        for(int j = 0; j < this->size; j++)
-        this->elements[j].Random1();
 }
 #endif
